@@ -56,3 +56,7 @@ func TestRun(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestMain(m *testing.M) {
+
+}
