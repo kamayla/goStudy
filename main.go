@@ -1,44 +1,30 @@
 package main
 
-import (
-	"context"
-	"errors"
-	"fmt"
-	"golang.org/x/sync/errgroup"
-	"log"
-	"net/http"
-)
+import "fmt"
 
-func run(ctx context.Context) error {
-	s := &http.Server{
-		Addr: ":18080",
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			_, _ = fmt.Fprintf(w, "Hello, %s", r.URL.Path[1:])
-		}),
-	}
+type OrderService interface {
+	Apply(int) error
+}
 
-	// error groupはどうも別ゴルーチンからのエラー戻り値の取得のために使うようだ。
-	eg, ctx := errgroup.WithContext(ctx)
+type ServiceImpl struct{}
 
-	eg.Go(func() error {
-		if err := s.ListenAndServe(); err != nil &&
-			!errors.Is(err, http.ErrServerClosed) {
-			log.Printf("failed to close: %+v", err)
-			return err
-		}
-		return nil
-	})
+func (c *ServiceImpl) Apply(id int) error {
+	fmt.Println(id)
+	return nil
+}
 
-	<-ctx.Done()
-	if err := s.Shutdown(context.Background()); err != nil {
-		log.Printf("failed to shutdown: %+v", err)
-	}
+type Application struct {
+	OrderService
+}
 
-	return eg.Wait()
+func (app *Application) Run(id int) error {
+	return app.Apply(id)
 }
 
 func main() {
-	if err := run(context.Background()); err != nil {
-		log.Printf("failed to terminate server %v", err)
+	app := Application{
+		OrderService: &ServiceImpl{},
 	}
+
+	_ = app.Run(19)
 }
