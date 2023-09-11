@@ -17,6 +17,7 @@ func run(ctx context.Context) error {
 		}),
 	}
 
+	// errgroupは別ゴルーチンからerrorを取得するために使える
 	eg, ctx := errgroup.WithContext(ctx)
 
 	eg.Go(func() error {
