@@ -14,8 +14,6 @@ jobs:
           go-version-file: go.mod
 
       - name: Exec Test
-        run: |
-          cd ./services/goApi
-          go test ./... -coverprofile=coverage.out
+        run: go test ./... -coverprofile=coverage.out
 
       - uses: k1LoW/octocov-action@v0
