@@ -1,0 +1,18 @@
+on:
+  push:
+name: test
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      - name: Exec Test
+        run: go test ./... -coverprofile=coverage.out
+
+      - uses: k1LoW/octocov-action@v0
