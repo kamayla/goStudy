@@ -4,6 +4,21 @@ name: test
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7.38
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 20s
+          --health-timeout 10s
+          --health-retries 10
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: todo
+          MYSQL_USER: todo
+          MYSQL_PASSWORD: password
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -13,6 +28,9 @@ jobs:
           go-version-file: go.mod
 
       - name: Exec Test
-        run: go test ./... -coverprofile=coverage.out
+        run: |
+          go install github.com/k0kubun/sqldef/cmd/mysqldef@latest
+          mysqldef -u todo -p password -h todo-db -P 3306 todo < ./_tools/mysql/schema.sql
+          go test ./... -coverprofile=coverage.out
 
       - uses: k1LoW/octocov-action@v0
