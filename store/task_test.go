@@ -25,8 +25,7 @@ func TestRepository_ListTasks(t *testing.T) {
 	}
 
 	wants := prepareTasks(ctx, t, tx)
-
-	fmt.Println(wants[0])
+	fmt.Println(wants)
 }
 
 func prepareTasks(ctx context.Context, t *testing.T, con Execer) entity.Tasks {
