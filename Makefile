@@ -17,3 +17,6 @@ migrate:
 
 dry-migrate:
 	mysqldef -u todo -p password -h todo-db -P 3306 todo --dry-run < ./_tools/mysql/schema.sql
+
+gen:
+	go generate ./...
