@@ -2,10 +2,11 @@ package store
 
 import (
 	"context"
+	"github.com/jmoiron/sqlx"
 	"study/entity"
 )
 
-func (r *Repository) ListTasks(ctx context.Context, db Queryer) (entity.Tasks, error) {
+func (r *Repository) ListTasks(ctx context.Context, db *sqlx.DB) (entity.Tasks, error) {
 	tasks := entity.Tasks{}
 
 	sql := `SElECT

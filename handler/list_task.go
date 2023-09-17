@@ -1,13 +1,15 @@
 package handler
 
 import (
+	"github.com/jmoiron/sqlx"
 	"net/http"
 	"study/entity"
 	"study/store"
 )
 
 type ListTask struct {
-	Store *store.TaskStore
+	DB   *sqlx.DB
+	Repo store.Repository
 }
 
 type task struct {
@@ -18,7 +20,14 @@ type task struct {
 
 func (lt *ListTask) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	tasks := lt.Store.All()
+	tasks, err := lt.Repo.ListTasks(ctx, lt.DB)
+
+	if err != nil {
+		ResposndJSON(ctx, w, &ErrResponse{
+			Message: err.Error(),
+		}, http.StatusInternalServerError)
+		return
+	}
 
 	rsp := []task{}
 
