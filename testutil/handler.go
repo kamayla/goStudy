@@ -38,7 +38,7 @@ func AssertResponse(t *testing.T, got *http.Response, status int, body []byte) {
 	}
 
 	if got.StatusCode != status {
-		t.Fatalf("want status %d, but got %d, body: %q", status, got.Status, gb)
+		t.Fatalf("want status %d, but got %q, body: %q", status, got.Status, gb)
 	}
 
 	if len(gb) == 0 && len(body) == 0 {

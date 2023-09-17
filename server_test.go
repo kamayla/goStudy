@@ -32,8 +32,6 @@ func TestServer_Run(t *testing.T) {
 
 	url := fmt.Sprintf("http://%s/%s", l.Addr().String(), in)
 
-	t.Logf(url)
-
 	rsp, err := http.Get(url)
 
 	if err != nil {
