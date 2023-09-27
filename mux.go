@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"net/http"
+	"study/auth"
 	"study/clock"
 	"study/config"
 	"study/handler"
@@ -30,18 +31,55 @@ func NewMux(ctx context.Context, cfg *config.Config) (http.Handler, func(), erro
 		Clocker: clock.RealClocker{},
 	}
 
+	rcli, err := store.NewKVS(ctx, cfg)
+
+	if err != nil {
+		return nil, cleanup, err
+	}
+
+	jwter, err := auth.NewJWTer(rcli, clock.RealClocker{})
+
+	if err != nil {
+		return nil, cleanup, err
+	}
+
+	l := &handler.Login{
+		Service: &service.Login{
+			DB:             db,
+			Repo:           &r,
+			TokenGenerator: jwter,
+		},
+		Validator: v,
+	}
+
+	mux.Post("/login", l.ServeHTTP)
+
 	at := &handler.AddTask{Service: &service.AddTask{
 		DB:   db,
 		Repo: &r,
 	}, Validator: v}
-	mux.Post("/tasks", at.ServeHTTP)
+
 	lt := &handler.ListTask{
 		Service: &service.ListTask{
 			DB:   db,
 			Repo: &r,
 		},
 	}
-	mux.Get("/tasks", lt.ServeHTTP)
+
+	mux.Route("/tasks", func(r chi.Router) {
+		r.Use(handler.AuthMiddleware(jwter))
+		r.Post("/tasks", at.ServeHTTP)
+		r.Get("/tasks", lt.ServeHTTP)
+	})
+
+	mux.Route("/admin", func(r chi.Router) {
+		r.Use(handler.AuthMiddleware(jwter), handler.AdminMiddleware)
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+			_, _ = w.Write([]byte(`{"message": "admin only"}`))
+		})
+	})
 
 	ru := &handler.RegisterUser{
 		Service:   &service.RegisterUser{DB: db, Repo: &r},

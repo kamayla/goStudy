@@ -55,7 +55,6 @@ type Execer interface {
 type Queryer interface {
 	Preparer
 	QueryxContext(ctx context.Context, query string, args ...any) (*sqlx.Rows, error)
-	QueryRowContext(ctx context.Context, query string, args ...any) *sqlx.Row
 	GetContext(ctx context.Context, dest interface{}, query string, args ...any) error
 	SelectContext(ctx context.Context, dest interface{}, query string, args ...any) error
 }
